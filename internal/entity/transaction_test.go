@@ -31,7 +31,6 @@ func TestCreateNewTransaction(t *testing.T) {
 	assert.Equal(t, 110.0, account2.Balance)
 }
 
-
 func TestCreateNewTransactionWithInsufficientBalance(t *testing.T) {
 	client1, _ := NewClient("name", "email")
 	account1 := NewAccount(client1)
@@ -85,4 +84,3 @@ func TestCreateNewTransactionWithInvalidAmount(t *testing.T) {
 	assert.Equal(t, 100.0, account1.Balance)
 	assert.Equal(t, 100.0, account2.Balance)
 }
-	
