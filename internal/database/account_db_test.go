@@ -28,7 +28,6 @@ func (s *AccountDBTestSuite) SetupTest() {
 	s.accountDB = NewAccountDB(db)
 
 	s.client, _ = entity.NewClient("name", "email")
-
 }
 
 func (s *AccountDBTestSuite) TearDownTest() {
