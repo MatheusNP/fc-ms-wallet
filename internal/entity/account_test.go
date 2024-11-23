@@ -16,7 +16,7 @@ func TestCreateNewAccount(t *testing.T) {
 	assert.Equal(t, 0.0, account.Balance)
 }
 
-func TestCreateAccountWithNilClient(t *testing.T){
+func TestCreateAccountWithNilClient(t *testing.T) {
 	account := NewAccount(nil)
 
 	assert.Nil(t, account)
@@ -29,7 +29,7 @@ func TestCredit(t *testing.T) {
 	account.Credit(10.0)
 	assert.Equal(t, 10.0, account.Balance)
 
-	account.Credit(10.0)	
+	account.Credit(10.0)
 	assert.Equal(t, 20.0, account.Balance)
 }
 

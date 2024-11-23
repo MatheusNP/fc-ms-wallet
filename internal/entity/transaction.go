@@ -8,20 +8,20 @@ import (
 )
 
 type Transaction struct {
-	ID        string
+	ID          string
 	AccountFrom *Account
-	AccountTo *Account
-	Amount    float64
-	CreatedAt time.Time
+	AccountTo   *Account
+	Amount      float64
+	CreatedAt   time.Time
 }
 
-func NewTransaction( accountFrom *Account, accountTo *Account, amount float64 ) (*Transaction, error) {
+func NewTransaction(accountFrom *Account, accountTo *Account, amount float64) (*Transaction, error) {
 	transaction := &Transaction{
-		ID:        uuid.NewString(),
+		ID:          uuid.NewString(),
 		AccountFrom: accountFrom,
-		AccountTo: accountTo,
-		Amount:    amount,
-		CreatedAt: time.Now(),
+		AccountTo:   accountTo,
+		Amount:      amount,
+		CreatedAt:   time.Now(),
 	}
 
 	err := transaction.Validate()
@@ -50,7 +50,7 @@ func (t *Transaction) Validate() error {
 	return nil
 }
 
-func (t *Transaction) Commit()  {
+func (t *Transaction) Commit() {
 	t.AccountFrom.Debit(t.Amount)
 	t.AccountTo.Credit(t.Amount)
 }

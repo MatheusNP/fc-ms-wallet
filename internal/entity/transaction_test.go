@@ -70,7 +70,7 @@ func TestCreateNewTransactionWithInvalidAmount(t *testing.T) {
 	account1 := NewAccount(client1)
 	client1.AddAccount(account1)
 	account1.Credit(100.0)
-	
+
 	client2, _ := NewClient("name", "email")
 	account2 := NewAccount(client2)
 	client2.AddAccount(account2)

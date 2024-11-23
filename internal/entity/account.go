@@ -7,9 +7,9 @@ import (
 )
 
 type Account struct {
-	ID       string
-	Client   *Client
-	Balance  float64
+	ID        string
+	Client    *Client
+	Balance   float64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
