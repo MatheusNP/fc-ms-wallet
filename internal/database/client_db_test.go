@@ -21,7 +21,7 @@ func (s *ClientDBTestSuite) SetupTest() {
 
 	s.db = db
 
-	db.Exec("CREATE TABLE clients (id varchar(255), name varchar(255), email varchar(255), created_at date, updated_at date default current_timestamp)")
+	db.Exec("CREATE TABLE clients (id varchar(255), name varchar(255), email varchar(255), created_at date, updated_at date)")
 
 	s.clientDB = NewClientDB(db)
 }
@@ -42,7 +42,7 @@ func (s *ClientDBTestSuite) TestGet() {
 	err := s.clientDB.Save(client)
 	s.Nil(err)
 
-	clientFound, err := s.clientDB.Get(client.ID)
+	clientFound, err := s.clientDB.FindByID(client.ID)
 	s.Nil(err)
 	s.Equal(client.ID, clientFound.ID)
 	s.Equal(client.Name, clientFound.Name)

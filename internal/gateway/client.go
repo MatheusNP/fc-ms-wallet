@@ -3,6 +3,6 @@ package gateway
 import "github.com/MatheusNP/fc-ms-wallet/internal/entity"
 
 type ClientGateway interface {
-	Get(id string) (*entity.Client, error)
+	FindByID(id string) (*entity.Client, error)
 	Save(client *entity.Client) error
 }

@@ -17,7 +17,7 @@ func (m *mockClientGateway) Save(client *entity.Client) error {
 	return args.Error(0)
 }
 
-func (m *mockClientGateway) Get(id string) (*entity.Client, error) {
+func (m *mockClientGateway) FindByID(id string) (*entity.Client, error) {
 	args := m.Called(id)
 	return args.Get(0).(*entity.Client), args.Error(1)
 }

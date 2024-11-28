@@ -31,7 +31,7 @@ func (m *mockClientGateway) Save(client *entity.Client) error {
 	return args.Error(0)
 }
 
-func (m *mockClientGateway) Get(id string) (*entity.Client, error) {
+func (m *mockClientGateway) FindByID(id string) (*entity.Client, error) {
 	args := m.Called(id)
 	return args.Get(0).(*entity.Client), args.Error(1)
 }
@@ -40,7 +40,7 @@ func TestCreateAccountUseCase_Execute(t *testing.T) {
 	client, _ := entity.NewClient("name", "email")
 
 	clientGateway := &mockClientGateway{}
-	clientGateway.On("Get", client.ID).Return(client, nil)
+	clientGateway.On("FindByID", client.ID).Return(client, nil)
 
 	accountGateway := &mockAccountGateway{}
 	accountGateway.On("Save", mock.Anything).Return(nil)
@@ -56,7 +56,7 @@ func TestCreateAccountUseCase_Execute(t *testing.T) {
 	assert.NotEmpty(t, output.ID)
 
 	clientGateway.AssertExpectations(t)
-	clientGateway.AssertNumberOfCalls(t, "Get", 1)
+	clientGateway.AssertNumberOfCalls(t, "FindByID", 1)
 	accountGateway.AssertExpectations(t)
 	accountGateway.AssertNumberOfCalls(t, "Save", 1)
 }

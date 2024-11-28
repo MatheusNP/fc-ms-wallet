@@ -1,16 +1,18 @@
 package createaccount
 
 import (
+	"fmt"
+
 	"github.com/MatheusNP/fc-ms-wallet/internal/entity"
 	"github.com/MatheusNP/fc-ms-wallet/internal/gateway"
 )
 
 type CreateAccountInputDTO struct {
-	ClientID string
+	ClientID string `json:"client_id"`
 }
 
 type CreateAccountOutputDTO struct {
-	ID string
+	ID string `json:"id"`
 }
 
 type CreateAccountUseCase struct {
@@ -29,8 +31,9 @@ func NewCreateAccountUseCase(
 }
 
 func (uc *CreateAccountUseCase) Execute(input CreateAccountInputDTO) (*CreateAccountOutputDTO, error) {
-	client, err := uc.ClientGateway.Get(input.ClientID)
+	client, err := uc.ClientGateway.FindByID(input.ClientID)
 	if err != nil {
+		fmt.Println(input.ClientID)
 		return nil, err
 	}
 
