@@ -2,8 +2,8 @@ POST http://localhost:3000/clients HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "Jenny Doe",
-  "email": "Jenny@doe.com"
+  "name": "John Doe",
+  "email": "John@doe.com"
 }
 
 ###
@@ -12,7 +12,7 @@ POST http://localhost:3000/accounts HTTP/1.1
 Content-Type: application/json
 
 {
-  "client_id": "ca29bc27-556e-495b-9334-42dcb2000007"
+  "client_id": "51ab7e36-1c9e-47f3-acc1-314ae69ce4bc"
 }
 
 ###
