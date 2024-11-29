@@ -24,13 +24,15 @@ func (h *WebTransactionHandler) CreateTransaction(w http.ResponseWriter, r *http
 	if err != nil {
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
-	output, err := h.CreateTransactionUseCase.Execute(dto)
+	output, err := h.CreateTransactionUseCase.Execute(r.Context(), dto)
 	if err != nil {
 		fmt.Println(err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -38,6 +40,7 @@ func (h *WebTransactionHandler) CreateTransaction(w http.ResponseWriter, r *http
 	if err != nil {
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
 		return
 	}
 

@@ -1,9 +1,12 @@
 package createtransaction
 
 import (
+	"context"
+
 	"github.com/MatheusNP/fc-ms-wallet/internal/entity"
 	"github.com/MatheusNP/fc-ms-wallet/internal/gateway"
 	"github.com/MatheusNP/fc-ms-wallet/pkg/events"
+	"github.com/MatheusNP/fc-ms-wallet/pkg/uow"
 )
 
 type CreateTransactionInputDTO struct {
@@ -13,57 +16,99 @@ type CreateTransactionInputDTO struct {
 }
 
 type CreateTransactionOutputDTO struct {
-	ID string `json:"id"`
+	ID            string  `json:"id"`
+	AccountFromID string  `json:"account_from_id"`
+	AccountToID   string  `json:"account_to_id"`
+	Amount        float64 `json:"amount"`
 }
 
 type CreateTransactionUseCase struct {
-	AccountGateway     gateway.AccountGateway
-	TransactionGateway gateway.TransactionGateway
+	Uow                uow.UowInterface
 	EventDispatcher    events.EventDispatcherInterface
 	TransactionCreated events.EventInterface
 }
 
 func NewCreateTransactionUseCase(
-	accountGateway gateway.AccountGateway,
-	transactionGateway gateway.TransactionGateway,
+	uow uow.UowInterface,
 	eventDispatcher events.EventDispatcherInterface,
 	transactionCreated events.EventInterface,
 ) *CreateTransactionUseCase {
 	return &CreateTransactionUseCase{
-		AccountGateway:     accountGateway,
-		TransactionGateway: transactionGateway,
+		Uow:                uow,
 		EventDispatcher:    eventDispatcher,
 		TransactionCreated: transactionCreated,
 	}
 }
 
-func (uc *CreateTransactionUseCase) Execute(input CreateTransactionInputDTO) (*CreateTransactionOutputDTO, error) {
-	accountFrom, err := uc.AccountGateway.FindByID(input.AccountFromID)
+func (uc *CreateTransactionUseCase) Execute(ctx context.Context, input CreateTransactionInputDTO) (*CreateTransactionOutputDTO, error) {
+
+	output := &CreateTransactionOutputDTO{}
+
+	err := uc.Uow.Do(ctx, func(_ *uow.Uow) error {
+		accountRepository := uc.getAccountRepository(ctx)
+		transactionRepository := uc.getTransactionRepository(ctx)
+
+		accountFrom, err := accountRepository.FindByID(input.AccountFromID)
+		if err != nil {
+			return err
+		}
+
+		accountTo, err := accountRepository.FindByID(input.AccountToID)
+		if err != nil {
+			return err
+		}
+
+		transaction, err := entity.NewTransaction(accountFrom, accountTo, input.Amount)
+		if err != nil {
+			return err
+		}
+
+		err = accountRepository.UpdateBalance(accountFrom)
+		if err != nil {
+			return err
+		}
+
+		err = accountRepository.UpdateBalance(accountTo)
+		if err != nil {
+			return err
+		}
+
+		err = transactionRepository.Create(transaction)
+		if err != nil {
+			return err
+		}
+
+		output.ID = transaction.ID
+		output.AccountFromID = transaction.AccountFrom.ID
+		output.AccountToID = transaction.AccountTo.ID
+		output.Amount = transaction.Amount
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
-	}
-
-	accountTo, err := uc.AccountGateway.FindByID(input.AccountToID)
-	if err != nil {
-		return nil, err
-	}
-
-	transaction, err := entity.NewTransaction(accountFrom, accountTo, input.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	err = uc.TransactionGateway.Create(transaction)
-	if err != nil {
-		return nil, err
-	}
-
-	output := &CreateTransactionOutputDTO{
-		ID: transaction.ID,
 	}
 
 	uc.TransactionCreated.SetPayload(output)
 	uc.EventDispatcher.Dispatch(uc.TransactionCreated)
 
 	return output, nil
+}
+
+func (uc *CreateTransactionUseCase) getAccountRepository(ctx context.Context) gateway.AccountGateway {
+	repo, err := uc.Uow.GetRepository(ctx, "AccountDB")
+	if err != nil {
+		panic(err)
+	}
+
+	return repo.(gateway.AccountGateway)
+}
+
+func (uc *CreateTransactionUseCase) getTransactionRepository(ctx context.Context) gateway.TransactionGateway {
+	repo, err := uc.Uow.GetRepository(ctx, "TransactionDB")
+	if err != nil {
+		panic(err)
+	}
+
+	return repo.(gateway.TransactionGateway)
 }

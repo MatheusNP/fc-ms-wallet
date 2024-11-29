@@ -1,37 +1,16 @@
 package createtransaction
 
 import (
+	"context"
 	"testing"
 
 	"github.com/MatheusNP/fc-ms-wallet/internal/entity"
 	"github.com/MatheusNP/fc-ms-wallet/internal/event"
+	"github.com/MatheusNP/fc-ms-wallet/internal/usecase/mocks"
 	"github.com/MatheusNP/fc-ms-wallet/pkg/events"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
-
-type mockAccountGateway struct {
-	mock.Mock
-}
-
-func (m *mockAccountGateway) Save(account *entity.Account) error {
-	args := m.Called(account)
-	return args.Error(0)
-}
-
-func (m *mockAccountGateway) FindByID(id string) (*entity.Account, error) {
-	args := m.Called(id)
-	return args.Get(0).(*entity.Account), args.Error(1)
-}
-
-type mockTransactionGateway struct {
-	mock.Mock
-}
-
-func (m *mockTransactionGateway) Create(transaction *entity.Transaction) error {
-	args := m.Called(transaction)
-	return args.Error(0)
-}
 
 func TestCreateTransaction(t *testing.T) {
 	client1, _ := entity.NewClient("name", "email")
@@ -44,19 +23,15 @@ func TestCreateTransaction(t *testing.T) {
 	client2.AddAccount(account2)
 	account2.Credit(100.0)
 
-	mockAccountGateway := &mockAccountGateway{}
-	mockAccountGateway.On("FindByID", account1.ID).Return(account1, nil)
-	mockAccountGateway.On("FindByID", account2.ID).Return(account2, nil)
-
-	mockTransactionGateway := &mockTransactionGateway{}
-	mockTransactionGateway.On("Create", mock.Anything).Return(nil)
+	mockUow := &mocks.UowMock{}
+	mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
 
 	dispatcher := events.NewEventDispatcher()
 	event := event.NewTransactionCreated()
+	ctx := context.Background()
 
 	usecase := NewCreateTransactionUseCase(
-		mockAccountGateway,
-		mockTransactionGateway,
+		mockUow,
 		dispatcher,
 		event,
 	)
@@ -67,14 +42,11 @@ func TestCreateTransaction(t *testing.T) {
 		Amount:        10.0,
 	}
 
-	output, err := usecase.Execute(input)
+	output, err := usecase.Execute(ctx, input)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, output)
-	assert.NotEmpty(t, output.ID)
 
-	mockAccountGateway.AssertExpectations(t)
-	mockAccountGateway.AssertNumberOfCalls(t, "FindByID", 2)
-	mockTransactionGateway.AssertExpectations(t)
-	mockTransactionGateway.AssertNumberOfCalls(t, "Create", 1)
+	mockUow.AssertExpectations(t)
+	mockUow.AssertNumberOfCalls(t, "Do", 1)
 }

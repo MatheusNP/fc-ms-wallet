@@ -4,45 +4,18 @@ import (
 	"testing"
 
 	"github.com/MatheusNP/fc-ms-wallet/internal/entity"
+	"github.com/MatheusNP/fc-ms-wallet/internal/usecase/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-type mockAccountGateway struct {
-	mock.Mock
-}
-
-func (m *mockAccountGateway) Save(account *entity.Account) error {
-	args := m.Called(account)
-	return args.Error(0)
-}
-
-func (m *mockAccountGateway) FindByID(id string) (*entity.Account, error) {
-	args := m.Called(id)
-	return args.Get(0).(*entity.Account), args.Error(1)
-}
-
-type mockClientGateway struct {
-	mock.Mock
-}
-
-func (m *mockClientGateway) Save(client *entity.Client) error {
-	args := m.Called(client)
-	return args.Error(0)
-}
-
-func (m *mockClientGateway) FindByID(id string) (*entity.Client, error) {
-	args := m.Called(id)
-	return args.Get(0).(*entity.Client), args.Error(1)
-}
-
 func TestCreateAccountUseCase_Execute(t *testing.T) {
 	client, _ := entity.NewClient("name", "email")
 
-	clientGateway := &mockClientGateway{}
+	clientGateway := &mocks.ClientGatewayMock{}
 	clientGateway.On("FindByID", client.ID).Return(client, nil)
 
-	accountGateway := &mockAccountGateway{}
+	accountGateway := &mocks.AccountGatewayMock{}
 	accountGateway.On("Save", mock.Anything).Return(nil)
 
 	usecase := NewCreateAccountUseCase(clientGateway, accountGateway)
