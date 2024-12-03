@@ -23,7 +23,7 @@ func (t *TransactionDB) Create(transaction *entity.Transaction) error {
 		return err
 	}
 
-	defer t.DB.Close()
+	defer stmt.Close()
 
 	_, err = stmt.Exec(
 		transaction.ID,
