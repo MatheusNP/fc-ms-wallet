@@ -25,7 +25,7 @@ func main() {
 		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		"user",
 		"pass",
-		"mysql",
+		"localhost",
 		"3306",
 		"wallet",
 	))
@@ -34,8 +34,12 @@ func main() {
 	}
 	defer db.Close()
 
+	if err := db.Ping(); err != nil {
+		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
+	}
+
 	configMap := ckafka.ConfigMap{
-		"bootstrap.servers": "kafka:29092",
+		"bootstrap.servers": "localhost:9092",
 		"group.id":          "wallet",
 	}
 	kafkaProducer := kafka.NewKafkaProducer(&configMap)

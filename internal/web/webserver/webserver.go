@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -34,5 +35,7 @@ func (s *WebServer) Start() {
 		s.Router.Post(path, handler)
 	}
 
-	http.ListenAndServe(s.WebServerPort, s.Router)
+	if err := http.ListenAndServe(s.WebServerPort, s.Router); err != nil {
+		fmt.Printf("Erro ao iniciar o servidor: %v \n", err)
+	}
 }
