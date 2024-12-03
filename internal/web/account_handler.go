@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	createaccount "github.com/MatheusNP/fc-ms-wallet/internal/usecase/create_account"
@@ -19,27 +20,28 @@ func NewWebAccountHandler(createAccountUseCase createaccount.CreateAccountUseCas
 
 func (h *WebAccountHandler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	var dto createaccount.CreateAccountInputDTO
+	w.Header().Set("Content-Type", "application/json")
+
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		fmt.Println(err.Error())
 		return
 	}
 
 	output, err := h.CreateAccountUseCase.Execute(dto)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		fmt.Println(err.Error())
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(output)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		fmt.Println(err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
