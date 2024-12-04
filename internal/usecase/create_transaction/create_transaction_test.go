@@ -27,13 +27,15 @@ func TestCreateTransaction(t *testing.T) {
 	mockUow.On("Do", mock.Anything, mock.Anything).Return(nil)
 
 	dispatcher := events.NewEventDispatcher()
-	event := event.NewTransactionCreated()
+	eventTransactionCreated := event.NewTransactionCreated()
+	eventBalanceUpdated := event.NewBalanceUpdated()
 	ctx := context.Background()
 
 	usecase := NewCreateTransactionUseCase(
 		mockUow,
 		dispatcher,
-		event,
+		eventTransactionCreated,
+		eventBalanceUpdated,
 	)
 
 	input := CreateTransactionInputDTO{
