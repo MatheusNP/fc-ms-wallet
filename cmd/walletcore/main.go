@@ -25,7 +25,7 @@ func main() {
 		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		"user",
 		"pass",
-		"localhost",
+		"mysql",
 		"3306",
 		"wallet",
 	))
@@ -39,7 +39,7 @@ func main() {
 	}
 
 	configMap := ckafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
+		"bootstrap.servers": "kafka:29092",
 		"group.id":          "wallet",
 	}
 	kafkaProducer := kafka.NewKafkaProducer(&configMap)
