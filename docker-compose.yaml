@@ -8,6 +8,13 @@ services:
     ports:
       - 8080:8080
 
+  eventreceiver:
+    build: ./repos/event-receiver
+    volumes:
+      - ./repos/event-receiver:/app
+    ports:
+      - 3003:3003
+
   mysql:
     image: mysql:5.7
     hostname: mysql
@@ -20,6 +27,19 @@ services:
       - 3306:3306
     volumes:
       - .docker/mysql:/var/lib/mysql
+
+  mysqlaccount:
+    image: mysql:5.7
+    hostname: mysqlaccount
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: account
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - 3307:3306
+    volumes:
+      - .docker/mysqlaccount:/var/lib/mysql
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:6.1.0"

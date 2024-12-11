@@ -1,0 +1,38 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"net/http"
+
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web/webserver"
+	_ "github.com/go-sql-driver/mysql"
+)
+
+func main() {
+	db, err := sql.Open("mysql", fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		"user",
+		"pass",
+		"mysqlaccount",
+		"3307",
+		"account",
+	))
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
+	}
+
+	webserver := webserver.NewWebServer(":3003")
+
+	webserver.AddHandler("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Hello World"))
+	})
+
+	webserver.Start()
+}
