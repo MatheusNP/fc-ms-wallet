@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/database"
+	getaccountbalance "github.com/MatheusNP/fc-ms-wallet/ms-account/internal/usecase/get_account_balance"
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web/webserver"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -27,7 +30,15 @@ func main() {
 		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
 	}
 
+	accountDB := database.NewAccountDB(db)
+
+	getAccountBalanceUseCase := getaccountbalance.NewGetAccountBalanceUseCase(accountDB)
+
 	webserver := webserver.NewWebServer(":3003")
+
+	accountHandler := web.NewWebAccountHandler(*getAccountBalanceUseCase)
+
+	webserver.AddHandler("/accounts", accountHandler.GetAccountBalance)
 
 	webserver.AddHandler("/hello", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
