@@ -9,6 +9,8 @@ import (
 	getaccountbalance "github.com/MatheusNP/fc-ms-wallet/ms-account/internal/usecase/get_account_balance"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web/webserver"
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/pkg/kafka"
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -28,6 +30,28 @@ func main() {
 
 	if err := db.Ping(); err != nil {
 		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
+	}
+
+	configMap := ckafka.ConfigMap{
+		"bootstrap.servers": "kafka:29092",
+		"group.id":          "account",
+	}
+	kafkaConsumer := kafka.NewConsumer(
+		&configMap,
+		[]string{"balances"},
+	)
+
+	msgChan := make(chan *ckafka.Message)
+
+	go func() {
+		err := kafkaConsumer.Consume(msgChan)
+		if err != nil {
+			fmt.Printf("Erro ao consumir mensagens: %v \n", err)
+		}
+	}()
+
+	for msg := range msgChan {
+		fmt.Printf("Mensagem recebida: %s\n", string(msg.Value))
 	}
 
 	accountDB := database.NewAccountDB(db)
