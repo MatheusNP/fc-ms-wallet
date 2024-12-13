@@ -3,8 +3,8 @@ package event
 import "time"
 
 type TransactionCreated struct {
-	Name    string
-	Payload interface{}
+	Name    string      `json:"name"`
+	Payload interface{} `json:"payload"`
 }
 
 func NewTransactionCreated() *TransactionCreated {

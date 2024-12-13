@@ -2,13 +2,18 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/database"
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/event"
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/event/handler"
 	getaccountbalance "github.com/MatheusNP/fc-ms-wallet/ms-account/internal/usecase/get_account_balance"
+	updateaccountbalance "github.com/MatheusNP/fc-ms-wallet/ms-account/internal/usecase/update_account_balance"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/web/webserver"
+	"github.com/MatheusNP/fc-ms-wallet/ms-account/pkg/events"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/pkg/kafka"
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/go-sql-driver/mysql"
@@ -20,7 +25,7 @@ func main() {
 		"user",
 		"pass",
 		"mysqlaccount",
-		"3307",
+		"3306",
 		"account",
 	))
 	if err != nil {
@@ -41,6 +46,11 @@ func main() {
 		[]string{"balances"},
 	)
 
+	accountDB := database.NewAccountDB(db)
+
+	getAccountBalanceUseCase := getaccountbalance.NewGetAccountBalanceUseCase(accountDB)
+	updateAccountBalanceUseCase := updateaccountbalance.NewUpdateAccountBalanceUseCase(accountDB)
+
 	msgChan := make(chan *ckafka.Message)
 
 	go func() {
@@ -50,13 +60,29 @@ func main() {
 		}
 	}()
 
-	for msg := range msgChan {
-		fmt.Printf("Mensagem recebida: %s\n", string(msg.Value))
-	}
+	eventDispatcher := events.NewEventDispatcher()
+	eventDispatcher.Register("BalanceUpdated", handler.NewUpdateBalanceKafkaHandler(updateAccountBalanceUseCase))
+	balanceUpdatedEvent := event.NewBalanceUpdated()
 
-	accountDB := database.NewAccountDB(db)
+	go func() {
+		for msg := range msgChan {
+			var eventMsg event.BalanceUpdated
 
-	getAccountBalanceUseCase := getaccountbalance.NewGetAccountBalanceUseCase(accountDB)
+			err := json.Unmarshal(msg.Value, &eventMsg)
+			if err != nil {
+				fmt.Printf("Erro ao decodificar JSON: %v \n", err)
+				continue
+			}
+
+			switch eventMsg.GetName() {
+			case "BalanceUpdated":
+				balanceUpdatedEvent.SetPayload(eventMsg.Payload)
+				eventDispatcher.Dispatch(balanceUpdatedEvent)
+			}
+
+			fmt.Printf("Mensagem recebida: %s\n", string(msg.Value))
+		}
+	}()
 
 	webserver := webserver.NewWebServer(":3003")
 

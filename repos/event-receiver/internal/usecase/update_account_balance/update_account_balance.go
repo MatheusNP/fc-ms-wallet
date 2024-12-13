@@ -6,15 +6,17 @@ import (
 )
 
 type UpdateAccountBalanceInputDTO struct {
-	AccountID string
-	Balance   float64
+	AccountID string  `json:"account_id"`
+	Balance   float64 `json:"balance"`
 }
 
 type UpdateAccountBalanceUseCase struct {
 	AccountGateway gateway.AccountGateway
 }
 
-func NewUpdateAccountBalanceUseCase(accountGateway gateway.AccountGateway) *UpdateAccountBalanceUseCase {
+func NewUpdateAccountBalanceUseCase(
+	accountGateway gateway.AccountGateway,
+) *UpdateAccountBalanceUseCase {
 	return &UpdateAccountBalanceUseCase{
 		AccountGateway: accountGateway,
 	}
@@ -26,7 +28,7 @@ func (uc *UpdateAccountBalanceUseCase) Execute(input UpdateAccountBalanceInputDT
 	account, err := uc.AccountGateway.FindByID(input.AccountID)
 	if err != nil {
 		// TODO: pegar erro exato
-		if err.Error() != "account not found" {
+		if err.Error() != "sql: no rows in result set" {
 			return err
 		}
 
