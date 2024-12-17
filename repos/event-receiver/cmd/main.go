@@ -17,6 +17,9 @@ import (
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/pkg/kafka"
 	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -32,6 +35,22 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
+
+	driver, err := mysql.WithInstance(db, &mysql.Config{})
+	if err != nil {
+		panic(err)
+	}
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		"mysql",
+		driver,
+	)
+	if err != nil {
+		panic(err)
+	}
+	if err := m.Up(); err != nil {
+		panic(err)
+	}
 
 	if err := db.Ping(); err != nil {
 		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
