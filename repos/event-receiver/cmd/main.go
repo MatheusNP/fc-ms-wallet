@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/database"
 	"github.com/MatheusNP/fc-ms-wallet/ms-account/internal/event"
@@ -48,9 +47,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err := m.Up(); err != nil {
-		panic(err)
-	}
+	m.Up()
 
 	if err := db.Ping(); err != nil {
 		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
@@ -109,10 +106,7 @@ func main() {
 
 	webserver.AddHandler("/accounts", accountHandler.GetAccountBalance)
 
-	webserver.AddHandler("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Hello World"))
-	})
+	fmt.Printf("Rodando na porta %s \n", webserver.WebServerPort)
 
 	webserver.Start()
 }

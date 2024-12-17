@@ -49,9 +49,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err := m.Up(); err != nil {
-		panic(err)
-	}
+	m.Up()
 
 	if err := db.Ping(); err != nil {
 		fmt.Printf("Erro ao conectar ao banco de dados: %v \n", err)
