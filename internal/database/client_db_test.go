@@ -21,7 +21,7 @@ func (s *ClientDBTestSuite) SetupTest() {
 
 	s.db = db
 
-	db.Exec("CREATE TABLE clients (id varchar(255), name varchar(255), email varchar(255), created_at timestamp, updated_at timestamp default current_timestamp)")
+	db.Exec("CREATE TABLE clients (id varchar(255), name varchar(255), email varchar(255), created_at timestamp default current_timestamp, updated_at timestamp default current_timestamp on update current_timestamp)")
 
 	s.clientDB = NewClientDB(db)
 }
