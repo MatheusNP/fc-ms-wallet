@@ -12,7 +12,7 @@ POST http://localhost:8080/accounts HTTP/1.1
 Content-Type: application/json
 
 {
-  "client_id": "6c0d9259-40cf-4f60-94eb-7f6cc9002c42"
+  "client_id": "8d34617d-81ac-4e5e-ada3-777c33087c46"
 }
 
 ###
@@ -21,8 +21,8 @@ POST http://localhost:8080/transactions HTTP/1.1
 Content-Type: application/json
 
 {
-  "account_from_id": "2629a6aa-ffae-4563-a8d8-2058eae570df",
-  "account_to_id": "bf4beaf3-6e8b-4ece-8d91-f4a63f9d5105",
+  "account_from_id": "912ca3ff-59d4-4640-acd8-76eb1faf0dbe",
+  "account_to_id": "31fb673a-012a-4cfc-8dc9-7a9ad0219437",
   "amount": 10
 }
 
@@ -31,7 +31,12 @@ Content-Type: application/json
 GET http://localhost:3003/hello HTTP/1.1
 Content-Type: application/json
 
-###
+### get john's account
 
-GET http://localhost:3003/accounts/111 HTTP/1.1
+GET http://localhost:3003/accounts/912ca3ff-59d4-4640-acd8-76eb1faf0dbe HTTP/1.1
+Content-Type: application/json
+
+### get jane's account
+
+GET http://localhost:3003/accounts/31fb673a-012a-4cfc-8dc9-7a9ad0219437 HTTP/1.1
 Content-Type: application/json
