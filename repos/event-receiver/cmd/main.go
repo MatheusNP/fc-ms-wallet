@@ -104,7 +104,7 @@ func main() {
 
 	accountHandler := web.NewWebAccountHandler(*getAccountBalanceUseCase)
 
-	webserver.AddHandler("/accounts", accountHandler.GetAccountBalance)
+	webserver.AddHandler("/accounts/{id}", accountHandler.GetAccountBalance)
 
 	fmt.Printf("Rodando na porta %s \n", webserver.WebServerPort)
 

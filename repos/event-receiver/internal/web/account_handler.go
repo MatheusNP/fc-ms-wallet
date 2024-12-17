@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	getaccountbalance "github.com/MatheusNP/fc-ms-wallet/ms-account/internal/usecase/get_account_balance"
+	"github.com/go-chi/chi/v5"
 )
 
 type WebAccountHandler struct {
@@ -20,7 +21,7 @@ func NewWebAccountHandler(getAccountBalanceUseCase getaccountbalance.GetAccountB
 
 func (h *WebAccountHandler) GetAccountBalance(w http.ResponseWriter, r *http.Request) {
 	dto := getaccountbalance.GetAccountBalanceInputDTO{
-		AccountID: r.URL.Query().Get("account_id"),
+		AccountID: chi.URLParam(r, "id"),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
